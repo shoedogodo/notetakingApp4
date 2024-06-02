@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "511718800357",
+    "project_id": "notetakingapp4",
+    "storage_bucket": "notetakingapp4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:511718800357:android:1d5a631c4160d4b3930d0c",
+        "android_client_info": {
+          "package_name": "com.example.notetakingapp4"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA25lMyl0Xocgmmcznft-Mt8BU9pX5PDRM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
