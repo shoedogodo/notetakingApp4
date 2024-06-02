@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     void showMenu(){
         PopupMenu popupMenu = new PopupMenu(MainActivity.this, menuBtn);
         popupMenu.getMenu().add("Logout");
+        popupMenu.getMenu().add("Change Password");
         popupMenu.show();
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -49,6 +51,11 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(MainActivity.this,LoginActivity.class));
                     finish();
                     return true;
+                }
+                else if (menuItem.getTitle()=="Change Password"){
+                    //Log.d("Gabriel", "Trying to change password");
+                    startActivity(new Intent(MainActivity.this,ChangePassword.class));
+                    finish();
                 }
                 return false;
             }

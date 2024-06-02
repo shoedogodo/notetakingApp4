@@ -74,6 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                     //login failed
                     Utility.showToast(LoginActivity.this,task.getException().getLocalizedMessage());
                 }
+                //return false;
             }
         });
     }

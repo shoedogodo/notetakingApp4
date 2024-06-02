@@ -81,6 +81,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                     //failure
                     Utility.showToast(CreateAccountActivity.this,task.getException().getLocalizedMessage());
                 }
+                //return false;
             }
         });
     }

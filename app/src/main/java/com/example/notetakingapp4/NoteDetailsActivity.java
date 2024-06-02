@@ -95,6 +95,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
                 }else{
                     Utility.showToast(NoteDetailsActivity.this,"Failed while adding note");
                 }
+                //return false;
             }
         });
     }
@@ -113,6 +114,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
                 }else{
                     Utility.showToast(NoteDetailsActivity.this,"Failed while deleting note");
                 }
+                //return false;
             }
         });
     }
