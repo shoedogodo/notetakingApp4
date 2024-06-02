@@ -32,7 +32,10 @@ public class Utility {
         return new SimpleDateFormat("MM/dd/yyyy").format(timestamp.toDate());
     }
 
-
+    static CollectionReference getCollectionReferenceforProfiles(){
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        return FirebaseFirestore.getInstance().collection("profiles").document(currentUser.getUid()).collection("my_profiles");
+    }
 
 
     public void isPasswordCorrect(String email, String password, final OnPasswordCheckListener listener) {

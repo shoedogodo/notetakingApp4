@@ -1,5 +1,6 @@
 package com.example.notetakingapp4;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -105,7 +106,9 @@ public class ChangePassword extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Log.d("Gabriel", newPassword);
-                    Utility.showToast(ChangePassword.this,newPassword);
+                    //Utility.showToast(ChangePassword.this,newPassword);
+                    startActivity(new Intent(ChangePassword.this,LoginActivity.class));
+                    finish();
                 } else {
                     Log.d("Gabriel", "change password fail");
                 }
