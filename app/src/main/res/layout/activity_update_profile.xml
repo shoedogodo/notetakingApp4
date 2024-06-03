@@ -8,18 +8,10 @@
     android:layout_marginHorizontal="32dp"
     tools:context=".CreateAccountActivity">
 
-    <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginVertical="32dp"
-        android:id="@+id/sign_up_icon"
-        android:src="@drawable/baseline_person_24"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/sign_up_icon"
+        android:paddingTop="100dp"
         android:orientation="vertical"
         android:id="@+id/hello_text">
 

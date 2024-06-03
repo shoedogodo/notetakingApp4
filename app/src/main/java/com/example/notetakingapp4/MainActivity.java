@@ -1,20 +1,29 @@
 package com.example.notetakingapp4;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.example.notetakingapp4.databinding.ActivityMainBinding;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,6 +38,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import android.app.ProgressDialog;
 
 import java.util.Map;
 
@@ -42,9 +56,17 @@ public class MainActivity extends AppCompatActivity {
 
     TextView userUsernameView, userMessageView;
 
+    ImageView profilePicView;
+
+    ActivityMainBinding binding;
+    Uri imageUri;
+
+    StorageReference storageReference;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(R.layout.activity_main);
 
         addNoteBtn = findViewById(R.id.add_note_btn);
@@ -58,9 +80,11 @@ public class MainActivity extends AppCompatActivity {
         userMessageView = findViewById(R.id.user_message_textview);
         //Log.d("Gabriel", "added message text");
 
+        profilePicView = findViewById(R.id.user_profile_pic);
+
         addNoteBtn.setOnClickListener((v)->startActivity(new Intent(MainActivity.this,NoteDetailsActivity.class)));
         menuBtn.setOnClickListener((v)->showMenu());
-
+        profilePicView.setOnClickListener((v)->updatePhoto());
 
         setupRecyclerView();
 
@@ -111,6 +135,10 @@ public class MainActivity extends AppCompatActivity {
         String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         email = email.replaceAll("[.#$\\[\\]]", "");
 
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("downloading Profile Info...");
+        progressDialog.show();
+
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -155,47 +183,78 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /*
-        mDatabase.child("profiles").child(email).child("username").addValueEventListener(new ValueEventListener() {
-            @Override
-           public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("Gabriel","Trying to change username");
-                // Get data as a String
-               String username = dataSnapshot.getValue(String.class);
-               userUsername.setText(username);
-           }
+        //setting up profile picture
+        storageReference = FirebaseStorage.getInstance().getReference(filename);
+        */
+        String filename = "images/"+email+"/profile_pic";  //e.g. saved as images/gabrielyu08@gmailcom/profile_pic
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference imageRef = storage.getReference(filename);
 
-           @Override
-           public void onCancelled(DatabaseError error) {
-               // Failed to read value
-               Log.w("MainActivity", "Failed to read username.", error.toException());
-           }
-        });
-
-        mDatabase.child("profiles").child(email).child("message").addValueEventListener(new ValueEventListener() {
+        imageRef.getBytes(1024*1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get data as a String
-                String message = dataSnapshot.getValue(String.class);
-                userMessage.setText(message);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w("MainActivity", "Failed to read message.", error.toException());
+            public void onSuccess(byte[] bytes) {
+                Log.d("Gabriel", "successfully fetched profile picture");
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                profilePicView.setImageBitmap(bitmap);
             }
         });
 
-         */
+        if (progressDialog.isShowing()){
+            progressDialog.dismiss();
+        }
+
+    }
+
+    void updatePhoto(){
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent,100);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode==100 && data!=null && data.getData()!=null){
+            imageUri = data.getData();
+            profilePicView.setImageURI(imageUri);
+        }
+        else{
+            return;
+        }
+
+        //need to save photo
+
+        String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        email = email.replaceAll("[.#$\\[\\]]", "");
+        String filename = "images/"+email+"/profile_pic";  //e.g. saved as images/gabrielyu08@gmailcom/profile_pic
+        storageReference = FirebaseStorage.getInstance().getReference(filename);
 
 
-        //FirebaseFirestore db = FirebaseFirestore.getInstance();
-        //FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        //DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("profiles/user123/my profiles/his profile");
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("uploading File...");
+        progressDialog.show();
 
-        //db.collection("profiles").
-
-        //FirestoreRecyclerOptions<Profile> options = new FirestoreRecyclerOptions.Builder<Note>().setQuery(query,Note.class).build();
+        storageReference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d("Gabriel", "uploaded image ");
+                Utility.showToast(MainActivity.this,"Successfully uploaded photo to cloud");
+                if (progressDialog.isShowing()){
+                    progressDialog.dismiss();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (progressDialog.isShowing()){
+                    progressDialog.dismiss();
+                }
+                Log.d("Gabriel", "did not upload image ");
+                Utility.showToast(MainActivity.this,"Failed to upload photo");
+            }
+        });
 
     }
 

@@ -26,6 +26,13 @@ android {
             )
         }
     }
+
+    buildFeatures{
+
+        viewBinding = true
+
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -58,5 +65,10 @@ dependencies {
 
     implementation("com.firebaseui:firebase-ui-firestore:8.0.2")
 
+    implementation ("com.google.firebase:firebase-firestore:25.0.0")
+    implementation("com.google.firebase:firebase-storage")
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
 }
