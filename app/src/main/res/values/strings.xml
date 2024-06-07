@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">Note Taking App</string>
+    <string-array name="category_options">
+        <item>Uncategorized</item>
+        <item>Personal</item>
+        <item>Work</item>
+        <item>Meeting</item>
+        <item>Travel</item>
+        <item>Life</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="main_category_options">
+        <item>All</item>
+        <item>Uncategorized</item>
+        <item>Personal</item>
+        <item>Work</item>
+        <item>Meeting</item>
+        <item>Travel</item>
+        <item>Life</item>
+        <item>Other</item>
+    </string-array>
+    <string name="upload">Upload image or videos</string>
+    <string name="full_image_view">FullImage</string>
 </resources>

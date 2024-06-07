@@ -83,11 +83,25 @@
 
     </RelativeLayout>
 
+    <SearchView
+        android:id="@+id/search_notes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title_bar_layout"
+        android:hint="Search notes"
+        android:inputType="text" />
+
+    <Spinner
+        android:id="@+id/category_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_notes"
+        android:entries="@array/main_category_options" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/title_bar_layout"
+        android:layout_below="@id/category_spinner"
         android:id="@+id/recyclerview"/>
 
 

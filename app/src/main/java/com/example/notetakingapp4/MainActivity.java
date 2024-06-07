@@ -11,11 +11,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -44,6 +51,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import android.app.ProgressDialog;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -60,9 +68,12 @@ public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
     Uri imageUri;
+    SearchView searchNotes;
+
+    Spinner categorySpinner;
 
     StorageReference storageReference;
-
+    private boolean adapterloaded;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,11 +93,46 @@ public class MainActivity extends AppCompatActivity {
 
         profilePicView = findViewById(R.id.user_profile_pic);
 
+        categorySpinner = findViewById(R.id.category_spinner);
+
+        searchNotes = findViewById(R.id.search_notes);
+        adapterloaded = false;
+
         addNoteBtn.setOnClickListener((v)->startActivity(new Intent(MainActivity.this,NoteDetailsActivity.class)));
         menuBtn.setOnClickListener((v)->showMenu());
         profilePicView.setOnClickListener((v)->updatePhoto());
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                refreshRecyclerView();
+            }
 
-        setupRecyclerView();
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        searchNotes.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                refreshRecyclerView();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                refreshRecyclerView();
+                return false;
+            }
+        });
+
+        Query query = Utility.getCollectionReferenceforNotes().orderBy("timestamp", Query.Direction.DESCENDING);
+        FirestoreRecyclerOptions<Note> options = new FirestoreRecyclerOptions.Builder<Note>().setQuery(query,Note.class).build();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        noteAdapter = new NoteAdapter(options,this);
+        recyclerView.setAdapter(noteAdapter);
+        adapterloaded = true;
 
         setupProfile();
     }
@@ -121,13 +167,42 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    void setupRecyclerView(){ //notes view
-        Query query = Utility.getCollectionReferenceforNotes().orderBy("timestamp", Query.Direction.DESCENDING);
-        FirestoreRecyclerOptions<Note> options = new FirestoreRecyclerOptions.Builder<Note>().setQuery(query,Note.class).build();
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    void refreshRecyclerView(){ //notes view
+        if(!adapterloaded)
+            return;
+        Query query;
+        String q = searchNotes.getQuery().toString()
+                .replaceAll("\\s+","")
+                .toLowerCase();
+        if (categorySpinner.getSelectedItem().toString()
+                .equals("All") &&
+                q.equals("")){
+            query = Utility.getCollectionReferenceforNotes().orderBy("timestamp", Query.Direction.DESCENDING);
+        }
+        else if (categorySpinner.getSelectedItem().toString()
+                .equals("All")){
+            query = Utility.getCollectionReferenceforNotes()
+                    .whereArrayContains("keywords", q)
+                    .orderBy("timestamp", Query.Direction.DESCENDING);
+        }
+        else if (q.equals("")){
+            query = Utility.getCollectionReferenceforNotes()
+                    .whereEqualTo("category",categorySpinner.getSelectedItem().toString())
+                    .orderBy("timestamp", Query.Direction.DESCENDING);
+        }
+        else {
+            query = Utility.getCollectionReferenceforNotes()
+                    .whereArrayContains("keywords",q)
+                    .whereEqualTo("category",categorySpinner.getSelectedItem().toString())
+                    .orderBy("timestamp",Query.Direction.DESCENDING);
+        }
 
-        noteAdapter = new NoteAdapter(options,this);
-        recyclerView.setAdapter(noteAdapter);
+        FirestoreRecyclerOptions<Note> options = new FirestoreRecyclerOptions.Builder<Note>()
+                .setQuery(query, Note.class)
+                .build();
+        noteAdapter.notifyDataSetChanged();
+        noteAdapter.updateOptions(options);
+        noteAdapter.notifyDataSetChanged();
     }
 
     void setupProfile(){
