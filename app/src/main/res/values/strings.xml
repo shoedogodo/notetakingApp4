@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Note Taking App</string>
+    <string name="app_name">NotePad</string>
     <string-array name="category_options">
         <item>Uncategorized</item>
         <item>Personal</item>

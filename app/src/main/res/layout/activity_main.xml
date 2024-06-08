@@ -96,7 +96,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/search_notes"
-        android:entries="@array/main_category_options" />
+        android:entries="@array/main_category_options"
+        android:spinnerMode="dropdown"
+        android:popupBackground="@drawable/rounded_corner_with_background"
+        android:dropDownSelector="#FFA500" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

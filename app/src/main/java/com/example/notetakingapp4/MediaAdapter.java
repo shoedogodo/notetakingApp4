@@ -1,17 +1,26 @@
 package com.example.notetakingapp4;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.collection.BuildConfig;
+
+import java.io.File;
 import java.util.List;
 
 public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> {
@@ -60,9 +69,15 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> 
             holder.imageView.setVisibility(View.GONE);
             holder.audioIcon.setVisibility(View.VISIBLE);
             holder.audioIcon.setOnClickListener(v -> {
-                Intent intent = new Intent(context, AudioPlayerActivity.class);
-                intent.putExtra("audio_uri", item.getUri().toString());
-                context.startActivity(intent);
+                File file = new File(item.getUri().getPath());
+                Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(uri, "audio/*");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                if (intent.resolveActivity(context.getPackageManager()) != null)
+                    context.startActivity(intent);
+                else
+                    Utility.showToast(context, "没有找到可用的音乐播放器");
             });
             holder.imageView.setOnLongClickListener(v -> {
                 mClickListener.onItemLongClick(v, position);

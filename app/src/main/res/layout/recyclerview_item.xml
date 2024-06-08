@@ -8,15 +8,16 @@
 
     <ImageView
         android:id="@+id/img_media"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="fitXY"/>
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"/>
 
     <ImageView
         android:id="@+id/img_audio_icon"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:src="@drawable/ic_audiotrack"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/ic_audiotrack_blue"
         android:visibility="gone"/>
 
 </LinearLayout>

@@ -51,7 +51,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:entries="@array/category_options" />
+            android:entries="@array/category_options"
+            android:spinnerMode="dropdown"
+            android:popupBackground="@drawable/rounded_corner_with_background"
+            android:dropDownSelector="#FFA500"
+            />
 
         <EditText
             android:layout_width="match_parent"
@@ -81,7 +85,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/media_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_below="@id/notes_content_text"
             android:layout_marginTop="16dp" />
 
