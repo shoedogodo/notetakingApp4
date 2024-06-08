@@ -22,6 +22,7 @@ import android.media.DrmInitData;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -44,6 +45,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -77,6 +80,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
     Spinner categorySpinner;
     ImageButton uploadImageButton, uploadAudioButton;
     ImageButton selectImageButton, selectAudioButton;
+    ImageButton openAIButton;
     ArrayList<String> urls;
     ArrayList<Integer> urlTypes;
     RecyclerView recyclerView;
@@ -100,6 +104,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
         uploadAudioButton = findViewById(R.id.upload_audio_button);
         selectAudioButton = findViewById(R.id.record_voice_button);
         selectImageButton = findViewById(R.id.take_pic_button);
+        openAIButton = findViewById(R.id.openai_button);
         recyclerView = findViewById(R.id.media_recycler_view);
         mediaItems = new ArrayList<>();
 
@@ -145,6 +150,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
         uploadAudioButton.setOnClickListener((v) -> openAudioStorage());
         selectImageButton.setOnClickListener((v)-> openCamera());
         selectAudioButton.setOnClickListener((v)-> openVoiceRecorder());
+        openAIButton.setOnClickListener((v)-> startOpenAIRecommend());
         adapter.setClickListener(new MediaAdapter.ItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -177,6 +183,11 @@ public class NoteDetailsActivity extends AppCompatActivity {
                         .show();
             }
         });
+    }
+
+    private void startOpenAIRecommend()  {
+        String str = this.titleEditText.getText().toString() + this.contentEditText.getText().toString();
+        new OpenAIChatTask().execute(str);
     }
 
     private void playAudio(Uri audioUri) {
@@ -495,6 +506,48 @@ public class NoteDetailsActivity extends AppCompatActivity {
             }
             if (connection != null) {
                 connection.disconnect();
+            }
+        }
+    }
+
+    private class OpenAIChatTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                OpenAIChat openAIChat = new OpenAIChat(params[0]);
+                return openAIChat.getResult();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String str) {
+            super.onPostExecute(str);
+            if (str.equals("Personal")){
+                Utility.showToast(NoteDetailsActivity.this, "I think it can be Categorized in " + str);
+                categorySpinner.setSelection(getIndexByEntry(str));
+            } else if (str.equals("Work")){
+                Utility.showToast(NoteDetailsActivity.this, "I think it can be Categorized in " + str);
+                categorySpinner.setSelection(getIndexByEntry(str));
+            } else if (str.equals("Meeting")){
+                Utility.showToast(NoteDetailsActivity.this, "I think it can be Categorized in " + str);
+                categorySpinner.setSelection(getIndexByEntry(str));
+            } else if (str.equals("Travel")){
+                Utility.showToast(NoteDetailsActivity.this, "I think it can be Categorized in " + str);
+                categorySpinner.setSelection(getIndexByEntry(str));
+            } else if (str.equals("Life")){
+                Utility.showToast(NoteDetailsActivity.this, "I think it can be Categorized in " + str);
+                categorySpinner.setSelection(getIndexByEntry(str));
+            } else if (str.equals("Other")){
+                Utility.showToast(NoteDetailsActivity.this, "I think it can be Categorized in " + str);
+                categorySpinner.setSelection(getIndexByEntry(str));
+            } else {
+                Utility.showToast(NoteDetailsActivity.this, "No qualified Category");
+                Log.e("OpenAIResponse", str);
             }
         }
     }

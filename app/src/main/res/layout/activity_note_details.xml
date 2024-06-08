@@ -142,6 +142,18 @@
                 android:layout_centerHorizontal="true"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="10dp"/>
+            <ImageButton
+                android:id="@+id/openai_button"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_robot"
+                android:layout_toRightOf="@id/record_voice_button"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_centerHorizontal="true"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
                 android:layout_marginTop="16dp"/>
 
         </LinearLayout>
