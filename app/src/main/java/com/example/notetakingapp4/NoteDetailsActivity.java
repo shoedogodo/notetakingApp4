@@ -67,8 +67,6 @@ public class NoteDetailsActivity extends AppCompatActivity {
     private static final int REQUEST_GALLERY_IMAGE = 1;
     private static final int REQUEST_PICK_AUDIO = 3;
     private static final int REQUEST_RECORD_AUDIO = 2;
-    private MediaRecorder mediaRecorder;
-    private String audioFilePath;
 
     EditText titleEditText,contentEditText;
     ImageButton saveNoteBtn;
@@ -78,11 +76,9 @@ public class NoteDetailsActivity extends AppCompatActivity {
     Button deleteNoteTextViewBtn;
     Spinner categorySpinner;
     ImageButton uploadImageButton, uploadAudioButton;
+    ImageButton selectImageButton, selectAudioButton;
     ArrayList<String> urls;
     ArrayList<Integer> urlTypes;
-    private static int SELECT_IMAGE = 0;
-    private static int SELECT_AUDIO = 1;
-
     RecyclerView recyclerView;
     List<MediaItem> mediaItems;
     MediaAdapter adapter;
@@ -100,8 +96,10 @@ public class NoteDetailsActivity extends AppCompatActivity {
         pageTitleTextView = findViewById(R.id.page_title);
         deleteNoteTextViewBtn = findViewById(R.id.delete_note_btn);
         categorySpinner = findViewById(R.id.note_category_spinner);
-        uploadImageButton = findViewById(R.id.upload_button);
-        uploadAudioButton = findViewById(R.id.upload_button2);
+        uploadImageButton = findViewById(R.id.upload_pic_button);
+        uploadAudioButton = findViewById(R.id.upload_audio_button);
+        selectAudioButton = findViewById(R.id.record_voice_button);
+        selectImageButton = findViewById(R.id.take_pic_button);
         recyclerView = findViewById(R.id.media_recycler_view);
         mediaItems = new ArrayList<>();
 
@@ -123,7 +121,6 @@ public class NoteDetailsActivity extends AppCompatActivity {
 
         downloadImagesAndSetupAdapter();
 
-
     }
 
     private void setClickListener(){
@@ -144,8 +141,10 @@ public class NoteDetailsActivity extends AppCompatActivity {
                         .show();
             }
         });
-        uploadImageButton.setOnClickListener((v) -> showMediaSelectionDialog(SELECT_IMAGE));
-        uploadAudioButton.setOnClickListener((v) -> showMediaSelectionDialog(SELECT_AUDIO));
+        uploadImageButton.setOnClickListener((v) -> openGallery());
+        uploadAudioButton.setOnClickListener((v) -> openAudioStorage());
+        selectImageButton.setOnClickListener((v)-> openCamera());
+        selectAudioButton.setOnClickListener((v)-> openVoiceRecorder());
         adapter.setClickListener(new MediaAdapter.ItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -196,44 +195,6 @@ public class NoteDetailsActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-
-    private void showMediaSelectionDialog(int selectMedia) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        if (selectMedia == SELECT_AUDIO){
-            builder.setTitle("选择媒体来源")
-                    .setItems(new CharSequence[]{"使用录音机录制", "从文件中选择"}, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which) {
-                                case 0: // 录音机
-                                    openVoiceRecorder();
-                                    break;
-                                case 1: // 从文件中选
-                                    openAudioStorage();
-                                    break;
-                            }
-                        }
-                    });
-            builder.show();
-
-        }
-        else if (selectMedia == SELECT_IMAGE){
-            builder.setTitle("选择媒体来源")
-                    .setItems(new CharSequence[]{"使用相机拍摄", "从图库中选择"}, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which) {
-                                case 0: // 使用相机拍摄
-                                    openCamera();
-                                    break;
-                                case 1: // 从图库中选择
-                                    openGallery();
-                                    break;
-                            }
-                        }
-
-                    });
-            builder.show();
-        }
-    }
     private void openVoiceRecorder() {
         Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
         if (intent.resolveActivity(getPackageManager()) != null) {
@@ -281,21 +242,21 @@ public class NoteDetailsActivity extends AppCompatActivity {
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
                 Uri imageUri = saveImageToStorage(imageBitmap);
                 if (imageUri != null) {
-                    MediaItem item = new MediaItem(imageUri, MediaItem.IMAGE);
+                    MediaItem item = new MediaItem(imageUri, MediaItem.IMAGE, false);
                     mediaItems.add(item);
                     setupRecyclerView();
                 }
             } else if (requestCode == REQUEST_GALLERY_IMAGE) {
                 Uri imageUri = data.getData();
                 if (imageUri != null) {
-                    MediaItem item = new MediaItem(imageUri, MediaItem.IMAGE);
+                    MediaItem item = new MediaItem(imageUri, MediaItem.IMAGE, false);
                     mediaItems.add(item);
                     setupRecyclerView();
                 }
             } else if (requestCode == REQUEST_PICK_AUDIO){
                 Uri audioUri = data.getData();
                 if (audioUri != null){
-                    MediaItem item = new MediaItem(audioUri, MediaItem.AUDIO);
+                    MediaItem item = new MediaItem(audioUri, MediaItem.AUDIO, false);
                     mediaItems.add(item);
                     setupRecyclerView();
                 }
@@ -303,7 +264,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
             else if (requestCode == REQUEST_RECORD_AUDIO){
                 Uri audioUri = data.getData();
                 if (audioUri != null){
-                    MediaItem item = new MediaItem(audioUri, MediaItem.AUDIO);
+                    MediaItem item = new MediaItem(audioUri, MediaItem.AUDIO, false);
                     mediaItems.add(item);
                     setupRecyclerView();
                 }
@@ -453,7 +414,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
                     Uri mediaUri = downloadAndSaveImage(this, url);  // Use the final variable inside the lambda
                     runOnUiThread(() -> {
                         if (mediaUri != null) {
-                            MediaItem item = new MediaItem(mediaUri, type);
+                            MediaItem item = new MediaItem(mediaUri, type, true);
                             mediaItems.add(item);
                         }
                         latch.countDown();

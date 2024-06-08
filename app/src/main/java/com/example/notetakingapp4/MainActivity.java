@@ -4,19 +4,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -54,6 +58,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import android.app.ProgressDialog;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -152,6 +158,23 @@ public class MainActivity extends AppCompatActivity {
         popupMenu.getMenu().add("Logout");
         popupMenu.getMenu().add("Update Profile");
         popupMenu.getMenu().add("Change Password");
+        try {
+            Field popup = PopupMenu.class.getDeclaredField("mPopup");
+            popup.setAccessible(true);
+            Object menuPopupHelper = popup.get(popupMenu);
+            Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+            Method setForceShowIcon = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+            setForceShowIcon.invoke(menuPopupHelper, true);
+            Method getPopup = classPopupHelper.getMethod("getPopup");
+            Object popupWindow = getPopup.invoke(menuPopupHelper);
+            Field popupWindowField = popupWindow.getClass().getDeclaredField("mPopup");
+            popupWindowField.setAccessible(true);
+            Object popupHelper = popupWindowField.get(popupWindow);
+            Method setBackgroundDrawable = popupHelper.getClass().getDeclaredMethod("setBackgroundDrawable", Drawable.class);
+            setBackgroundDrawable.invoke(popupHelper, ContextCompat.getDrawable(this, R.drawable.rounded_corner_with_background));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         popupMenu.show();
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override

@@ -10,9 +10,12 @@ public class MediaItem {
     private Uri uri;
     private int type;
 
-    public MediaItem(Uri uri, int type) {
+    public boolean isDownloaded;
+
+    public MediaItem(Uri uri, int type, boolean isDownloaded) {
         this.uri = uri;
         this.type = type;
+        this.isDownloaded = isDownloaded;
     }
 
     public Uri getUri() {

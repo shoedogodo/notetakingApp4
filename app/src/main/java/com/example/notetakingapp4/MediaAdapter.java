@@ -2,10 +2,12 @@ package com.example.notetakingapp4;
 
 import static androidx.core.content.ContextCompat.startActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -69,8 +73,18 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> 
             holder.imageView.setVisibility(View.GONE);
             holder.audioIcon.setVisibility(View.VISIBLE);
             holder.audioIcon.setOnClickListener(v -> {
-                File file = new File(item.getUri().getPath());
-                Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
+                if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                }
+                Uri uri;
+                if (item.isDownloaded){
+                    File file = new File(item.getUri().getPath());
+                    uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
+                }
+                else{
+                    uri = item.getUri();
+                }
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(uri, "audio/*");
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
