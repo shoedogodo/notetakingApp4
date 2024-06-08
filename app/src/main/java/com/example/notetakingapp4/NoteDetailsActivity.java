@@ -32,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -186,8 +187,39 @@ public class NoteDetailsActivity extends AppCompatActivity {
     }
 
     private void startOpenAIRecommend()  {
-        String str = this.titleEditText.getText().toString() + this.contentEditText.getText().toString();
-        new OpenAIChatTask().execute(str);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("How can I help you?");
+        String[] options = {"Help me to categorize the Note", "Check my notes for grammatical errors"};
+        Context context = this;
+        String title = this.titleEditText.getText().toString();
+        String content = this.contentEditText.getText().toString();
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        if (title.replaceAll("\\s+","").equals("") && content.replaceAll("\\s+","").equals("")){
+                            Utility.showToast(context,"Content is Empty");
+                        }
+                        String str0 = "My note content is '" + title + " " + content +
+                            "', Here are Six Categories :{Personal, Work, Meeting, Travel, Life, Other}, Please choose the most qualified category. Notice: you should only reply one word included in the six categories and Don't reply any other words";
+                        Utility.showToast(context,"Thinking...");
+                        new OpenAIChatTask().execute(str0);
+                        break;
+                    case 1:
+                        String str1 = "Can you help me to check my note for grammatical mistakes: \n Title: " +title+"\nContent: "+ content;
+                        Utility.showToast(context,"Thinking...");
+                        new OpenAIChatTask().execute(str1);
+                        // 用户选择了选项二
+                        break;
+                }
+            }
+        });
+
+        // 创建 AlertDialog
+        AlertDialog dialog = builder.create();
+        // 显示对话框
+        dialog.show();
     }
 
     private void playAudio(Uri audioUri) {
@@ -308,8 +340,6 @@ public class NoteDetailsActivity extends AppCompatActivity {
     }
 
     void saveNote(){
-        Utility.showToast(this,"Saving");
-        saveNoteBtn.setEnabled(false);
         String noteTitle = titleEditText.getText().toString();
         String noteContent = contentEditText.getText().toString();
         String noteCategory = categorySpinner.getSelectedItem().toString();
@@ -318,6 +348,9 @@ public class NoteDetailsActivity extends AppCompatActivity {
             titleEditText.setError("Title is required");
             return;
         }
+
+        Utility.showToast(this,"Saving");
+        saveNoteBtn.setEnabled(false);
         Note note = new Note();
         note.setTitle(noteTitle);
         note.setContent(noteContent);
@@ -546,8 +579,22 @@ public class NoteDetailsActivity extends AppCompatActivity {
                 Utility.showToast(NoteDetailsActivity.this, "I think it can be Categorized in " + str);
                 categorySpinner.setSelection(getIndexByEntry(str));
             } else {
-                Utility.showToast(NoteDetailsActivity.this, "No qualified Category");
-                Log.e("OpenAIResponse", str);
+                AlertDialog.Builder builder = new AlertDialog.Builder(NoteDetailsActivity.this);
+                builder.setTitle("response");
+                builder.setMessage(str);
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+
+                // 设置取消按钮
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                Log.d("OpenAIResponse", str);
             }
         }
     }

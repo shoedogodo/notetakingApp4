@@ -15,8 +15,6 @@ public class OpenAIChat {
     public OpenAIChat(String content) throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient();
         String url = "https://api.openai-hk.com/v1/chat/completions";
-        String str = "My note content is '" + content +
-                "', Here are Six Categories :{Personal, Work, Meeting, Travel, Life, Other}, Please choose the most qualified category. Notice: you should only reply one word included in the six categories and Don't reply any other words";
 
         MediaType mediaType = MediaType.parse("application/json");
         JSONObject jsonBody = new JSONObject();
@@ -28,7 +26,7 @@ public class OpenAIChat {
         JSONArray messages = new JSONArray();
         JSONObject message = new JSONObject();
         message.put("role", "user");
-        message.put("content", str);  // 确保content已正确处理避免JSON错误
+        message.put("content", content);  // 确保content已正确处理避免JSON错误
         messages.put(message);
         jsonBody.put("messages", messages);
 
