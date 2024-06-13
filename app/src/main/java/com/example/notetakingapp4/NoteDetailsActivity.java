@@ -1,5 +1,7 @@
 package com.example.notetakingapp4;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -127,6 +129,23 @@ public class NoteDetailsActivity extends AppCompatActivity {
 
         downloadImagesAndSetupAdapter();
 
+
+        OnBackPressedDispatcher dispatcher = getOnBackPressedDispatcher();
+        dispatcher.addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (titleEditText.getText().toString().isEmpty() && contentEditText.getText().toString().isEmpty() && (mediaItems == null || mediaItems.isEmpty()))
+                {
+                    finish();
+                }
+                else {
+                    if (titleEditText.getText().toString().isEmpty())
+                        titleEditText.setText("Untitled");
+                    saveNote();
+                    finish();
+                }
+            }
+        });
     }
 
     private void setClickListener(){
@@ -414,7 +433,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()){
                     //note is added
-                    Utility.showToast(NoteDetailsActivity.this,"Note added successfully");
+                    Utility.showToast(NoteDetailsActivity.this,"Note uploaded successfully");
                     finish();
                 }else{
                     Utility.showToast(NoteDetailsActivity.this,"Failed while adding note");
